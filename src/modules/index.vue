@@ -4,6 +4,10 @@
 			<span>go to detail</span>
 		</router-link>
 
+		<router-link to="/template">
+			<span>go to template</span>
+		</router-link>
+
 		<p>你好，你是？我是{{ name }}</p>
 		<button @click="sayHello">click</button>
 	</div>
