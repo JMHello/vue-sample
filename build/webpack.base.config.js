@@ -1,23 +1,24 @@
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
 const {
   VueLoaderPlugin
 } = require('vue-loader');
 
-const ROOT = process.cwd();
-const ENTRY = path.resolve(ROOT, './src');
-const OUTPUT = path.resolve(ROOT, './dist');
+const config = require('./config');
+const p = config.path;
+const isDev = process.env.NODE_ENV === 'development';
 
 module.exports = {
-  entry: path.resolve(ENTRY, 'main.js'),
-  output: {
-    filename: '[name].js',
-    path: OUTPUT,
-    publicPath: '/'
+  entry: {
+    index: path.resolve(p.entry, 'index.js'),
   },
+
   resolve: {
     extensions: [
+      '.ts',
       '.js',
       '.vue',
       '.css',
@@ -29,33 +30,104 @@ module.exports = {
   },
   module: {
     rules: [{
-      test: /\.vue$/,
-      loader: 'vue-loader'
-    }, {
-      test: /\.css$/,
-      use: [
-        'style-loader',
-        'css-loader'
-      ]
-    }, {
-      test: /\.(png|jpeg|jpg|svg)$/,
-      use: [{
+        test: /\.vue$/,
+        loader: 'vue-loader',
+        exclude: /node_modules/,
+        include: p.entry
+      },
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        exclude: /node_modules/,
+        include: p.entry
+      },
+      {
+        test: /\.tsx?$/,
+        loader: 'ts-loader',
+        exclude: /node_modules/,
+        options: {
+          // vue 单文件组件中假如使用了lang="ts"，ts-loader需要配置appendTsSuffixTo: [/\.vue$/]，用来给.vue文件添加个.ts后缀用于编译。
+          appendTsSuffixTo: [/\.vue$/],
+        }
+      },
+      {
+        test: /\.css$/,
+        use: [
+          isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+          'css-loader'
+        ]
+      },
+      {
+        test: /\.sass$/,
+        use: [
+          isDev ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
+          'css-loader',
+          {
+            loader: 'sass-loader',
+            options: {
+              // sass-loader 会默认处理不基于缩进的 scss 语法。为了使用基于缩进的 sass 语法，需要向这个 loader 传递选项 indentedSyntax
+              indentedSyntax: true
+            }
+          },
+          {
+            loader: 'sass-resources-loader',
+            options: {
+              resources: path.resolve(p.entry, 'assets/css/vars.scss')
+            }
+          }
+        ]
+      },
+      {
+        test: /\.scss$/,
+        use: [
+          isDev ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
+          'css-loader',
+          'sass-loader',
+          {
+            loader: 'sass-resources-loader',
+            options: {
+              resources: path.resolve(p.entry, 'assets/css/vars.scss')
+            }
+          }
+        ]
+      },
+      {
+        test: /\.less$/,
+        use: [
+          isDev ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
+          'css-loader',
+          'less-loader'
+        ]
+      },
+      {
+        test: /\.(woff(2)?|ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
         loader: 'url-loader',
         options: {
-          limit: 1024,
-          name: '[name].[ext]'
+          name: '[name].[ext]?[hash]'
         }
-      }]
-    }]
+      },
+      {
+        test: /\.(png|jpeg|jpg|svg)$/,
+        use: [{
+          loader: 'url-loader',
+          options: {
+            limit: 1024,
+            name: '[name].[ext]'
+          }
+        }]
+      },
+    ]
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.resolve(ENTRY, './index.html'),
+      template: path.resolve(p.entry, './index.html'),
       filename: 'index.html',
       inject: true
     }),
-    new VueLoaderPlugin(),
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.NoEmitOnErrorsPlugin()
+
+    new VueLoaderPlugin()
+    // 在dev环境下，去掉 webpack.NamedModulesPlugin 及 webpack.NoEmitOnErrorsPlugin 插件，因为 webpack4 开发模式已经内置
+    // new webpack.NamedModulesPlugin()
+    // new webpack.NoEmitOnErrorsPlugin()
   ]
 }
