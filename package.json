@@ -5,7 +5,7 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "cross-env NODE_ENV=development webpack-dev-server --config ./build/webpack.dev.config.js"
+    "start": "cross-env NODE_ENV=development webpack-dev-server --config ./build/webpack.dev.config.js"
   },
   "keywords": [
     "vue实例"
@@ -25,6 +25,7 @@
     "mockjs": "^1.0.1-beta3",
     "node-sass": "^4.11.0",
     "optimize-css-assets-webpack-plugin": "^5.0.1",
+    "postcss-loader": "^3.0.0",
     "sass-loader": "^7.1.0",
     "sass-resources-loader": "^2.0.0",
     "style-loader": "^0.23.1",
@@ -42,6 +43,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "path": "^0.12.7",
+    "postcss": "^7.0.14",
     "vue": "^2.5.17",
     "vuex": "^3.0.1"
   }

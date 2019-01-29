@@ -11,6 +11,38 @@ const config = require('./config');
 const p = config.path;
 const isDev = process.env.NODE_ENV === 'development';
 
+
+const cssLoader = {
+  loader: 'css-loader',
+  options: {
+    importLoaders: 1
+  }
+};
+
+const styleLoader = {
+  loader: 'style-loader'
+};
+
+const postCssLoader = {
+  loader: 'postcss-loader',
+  options: {
+    plugins: [
+      require('./css.rpx')
+    ]
+  }
+};
+
+const extractLoader = {
+  loader: MiniCssExtractPlugin.loader
+}
+
+const sassResourcesLoader = {
+  loader: 'sass-resources-loader',
+  options: {
+    resources: path.resolve(p.entry, 'assets/css/vars.scss')
+  }
+}
+
 module.exports = {
   entry: {
     index: path.resolve(p.entry, 'index.js'),
@@ -53,15 +85,17 @@ module.exports = {
       {
         test: /\.css$/,
         use: [
-          isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
-          'css-loader'
+          isDev ? styleLoader : extractLoader,
+          cssLoader,
+          postCssLoader
         ]
       },
       {
         test: /\.sass$/,
         use: [
-          isDev ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
-          'css-loader',
+          isDev ? 'vue-style-loader' : extractLoader,
+          cssLoader,
+          postCssLoader,
           {
             loader: 'sass-loader',
             options: {
@@ -69,34 +103,26 @@ module.exports = {
               indentedSyntax: true
             }
           },
-          {
-            loader: 'sass-resources-loader',
-            options: {
-              resources: path.resolve(p.entry, 'assets/css/vars.scss')
-            }
-          }
+          sassResourcesLoader
         ]
       },
       {
         test: /\.scss$/,
         use: [
-          isDev ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
-          'css-loader',
+          isDev ? 'vue-style-loader' : extractLoader,
+          cssLoader,
+          postCssLoader,
           'sass-loader',
-          {
-            loader: 'sass-resources-loader',
-            options: {
-              resources: path.resolve(p.entry, 'assets/css/vars.scss')
-            }
-          }
+          sassResourcesLoader
         ]
       },
       {
         test: /\.less$/,
         use: [
           isDev ? 'vue-style-loader' : MiniCssExtractPlugin.loader,
-          'css-loader',
-          'less-loader'
+          cssLoader,
+          'less-loader',
+          postCssLoader
         ]
       },
       {

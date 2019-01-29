@@ -101,3 +101,10 @@ export default {
 };
 </script>
 
+<style lang="scss">
+* {
+	font-size: 18rpx;
+	width: 100rpx;
+}
+</style>
+
