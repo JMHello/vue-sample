@@ -14,21 +14,35 @@
 	<script>
 		(function flexible() {
 			const html = document.documentElement;
-			const dpr = window.devicePixelRatio || 1;
+			const doc = document;
+			const win = window;
+			const dpr = win.devicePixelRatio || 1;
+			let tid = null;
+
+			doc.addEventListener('DOMContentLoaded', calc, false);
+			win.addEventListener('resize', function () {
+				clearTimeout(tid);
+				tid = setTimeout(calc, 300);
+			}, false);
 
 			calc();
 
-			document.addEventListener('DOMContentLoaded', calc, false);
-			window.addEventListener('size', calc, false);
-
 			function calc() {
-				var width = html.clientWidth || body.clientWidth || window.screen.width || window.innerWidth;
+				const width = html.clientWidth || doc.body.clientWidth || win.screen.width || win.innerWidth;
 
 				if (width) {
 					html.style.fontSize = width / 3.75 + 'px';
 				}
 
-				html.dataset.dpr = window.devicePixelRatio;
+				html.dataset.dpr = dpr;
+			}
+
+			if (doc.readyState === 'complete') {
+				doc.body.style.fontSize = 12 * dpr + 'px';
+			} else {
+				doc.addEventListener('DOMContentLoaded', function (e) {
+					doc.body.style.fontSize = 12 * dpr + 'px';
+				}, false);
 			}
 		})();
 
